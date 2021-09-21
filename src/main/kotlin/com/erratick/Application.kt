@@ -11,7 +11,6 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.jackson.*
 import io.ktor.locations.*
-import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.util.*
 import org.koin.dsl.module
@@ -51,9 +50,14 @@ fun Application.module(testing: Boolean = false) {
         convert<QueryStringList> {
             decode { values, _ ->
                 QueryStringList().apply {
-
                     values.forEach { value -> addAll(value.split(","))}
                 }
+            }
+        }
+        convert<Aggregate> {
+            decode { values, _ ->
+                println("values ${values}")
+                Aggregate.valueOf(values.first())
             }
         }
     }
@@ -71,132 +75,6 @@ fun Application.module(testing: Boolean = false) {
     routing {
         setupRoutes()
         setupErrorHandling()
-        get("/") {
-
-//            val config = HoconApplicationConfig(ConfigFactory.load()).config("influxdb")
-//            val bucket = config.property("bucket").getString()
-//            val influx = InfluxDBClientKotlinFactory
-//                .create(
-//                    config.property("url").getString(),
-//                    config.property("token").getString().toCharArray(),
-//                    config.property("org").getString(),
-//                    bucket)
-//
-//            val writeApi = influx.getWriteKotlinApi()
-//            val measurement = MeasurementRepositoryImpl().get("clicks_impressions") ?: throw Exception("Could not find measurement")
-//
-//            val point = Point.measurement(measurement.id.toString())
-//                .addTag("campaign", "summer")
-//                .addTag("datasource", "google")
-//                .addField("clicks", 55)
-//                .addField("impressions", 88)
-//                .time(Instant.now().toEpochMilli(), WritePrecision.MS)
-//
-//            writeApi.writePoint(point)
-//
-//
-//            //writeApi.writeRecord("ctr_measurement,campaign=spring clicks2=2,impressions2=10", WritePrecision.NS)
-//
-//            val datasource = "google"
-//            val totalClicksForAGivenDatasourceAndRange =
-//                """
-//                    from(bucket: "$bucket") |>
-//                    range(start: 0) |>
-//                    filter(fn: (r) =>
-//                        r._measurement == "ctr_measurement" and
-//                        r._field == "clicks" and
-//                        r.datasource == "$datasource"
-//                    ) |>
-//                    sum()
-//                """.trimIndent()
-//
-//            val impressionsOverTimeDaily = """
-//                from(bucket: "$bucket") |>
-//                range(start: 0) |>
-//                filter(fn: (r) =>
-//                    r._measurement == "ctr_measurement" and
-//                    r._field == "impressions"
-//                ) |>
-//                aggregateWindow(every: 1d, fn: sum)
-//            """.trimIndent()
-//
-//            val clickthroughRatePerDatasourceAndCampaign = """
-//                from(bucket: "$bucket") |>
-//                range(start: 0) |>
-//                filter(fn: (r) =>
-//                    r._measurement == "ctr_measurement" and
-//                    ( r._field == "clicks" or r._field == "impressions" )
-//                ) |>
-//                pivot(
-//                    rowKey:["_time"],
-//                    columnKey: ["_field"],
-//                    valueColumn: "_value"
-//                ) |>
-//                map(fn: (r) =>
-//                    ({ r with _value: 10000 * r.clicks / r.impressions })
-//                )
-//                |> group(columns: ["datasource", "campaign"])
-//                |> mean()
-//            """.trimIndent()
-//
-//            /*|> group(columns:["datasource", "campaign"]) |>
-//                mean()*/
-//
-//            runBlocking {
-//                influx
-//                    .getQueryKotlinApi()
-//                    .query(totalClicksForAGivenDatasourceAndRange)
-//                    .consumeEach { r ->
-//                        val result = QueryResult(
-//                            value = r.value,
-//                            start = r.start,
-//                            end = r.stop,
-//                            dimensions = r.values.filter { it.key in  measurement.dimensions }.map {
-//                                Dimension(name = it.key, value = it.value.toString())
-//                            }
-//                        )
-//                        println("result: ${result}")
-//                    }
-//            }
-//            println("")
-//            runBlocking {
-//                influx
-//                    .getQueryKotlinApi()
-//                    .query(impressionsOverTimeDaily)
-//                    .consumeEach { r ->
-//                        val result = QueryResult(
-//                            value = r.value,
-//                            start = r.start,
-//                            end = r.stop,
-//                            dimensions = r.values.filter { it.key in  measurement.dimensions }.map {
-//                                Dimension(name = it.key, value = it.value.toString())
-//                            }
-//                        )
-//                        println("result: ${result}")
-//                    }
-//            }
-//            println("")
-//            runBlocking {
-//                influx
-//                    .getQueryKotlinApi()
-//                    .query(clickthroughRatePerDatasourceAndCampaign)
-//                    .consumeEach { r ->
-//                        val result = QueryResult(
-//                            value = r.value,
-//                            start = r.start,
-//                            end = r.stop,
-//                            dimensions = r.values.filter { it.key in  measurement.dimensions }.map {
-//                                Dimension(name = it.key, value = it.value.toString())
-//                            }
-//                        )
-//                        println("result: ${result}")
-//                    }
-//            }
-//
-//            influx.close()
-
-            call.respondText("Hello, world!")
-        }
     }
 
 }

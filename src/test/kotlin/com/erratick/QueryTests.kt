@@ -7,6 +7,8 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import org.junit.Test
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.test.assertEquals
@@ -156,7 +158,7 @@ class QueryTests {
     }
 
     @Test
-    fun `Click-Through Rate (CTR) per Datasource and Campaign`() {
+    fun `Click-Through Rate (CTR) per Datasource and Campaign over time (line graphs)`() {
 
         withTestApplication(Application::module) {
 
@@ -270,6 +272,180 @@ class QueryTests {
             }
         }
 
+    }
+
+    @Test
+    fun `Summary Click-Through Rate (CTR) per Datasource and Campaign (barchart)`() {
+
+        withTestApplication(Application::module) {
+
+            val datasource1 = getRandomString(50)
+            val campaign1 = getRandomString(50)
+            val datasource2 = getRandomString(50)
+            val campaign2 = getRandomString(50)
+            val time = Instant.now()
+
+            val dataPointRepository = DataPointRepositoryImpl()
+
+            // Create points for the datasource1,campaign1 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 10)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 20)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 35)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            // Create points for the datasource2,campaign2 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource2)
+                        .addField("clicks", 10)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource2)
+                        .addField("clicks", 20)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource2)
+                        .addField("clicks", 35)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            // Create points for the datasource1,campaign2 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 10)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 20)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 35)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            val queryString = "metric=${MetricId.ctr}&groupBy=datasource,campaign&aggregate=sum"
+
+            handleRequest(
+                HttpMethod.Get,
+                "/query/${MeasurementId.clicks_impressions}?$queryString").apply {
+
+                assertEquals(HttpStatusCode.OK, response.status())
+
+                var queryResultList = JsonParser.parseString(response.content.toString()).asJsonArray
+                assert(queryResultList.size() >= 3){
+                    "Expect at least 3 lists of results, one for each combination of datasource and campaign," +
+                            " but only found ${queryResultList.size()}"
+                }
+
+                // Examine each list of results, and confirm all results have the same campaign and datasource
+                queryResultList.forEach {
+                    val queryResults = it.asJsonArray
+                    val firstResult = queryResults.first().asJsonObject
+                    val expectedCampaign = firstResult.get("dimensions").asJsonObject.get("campaign").asString
+                    val expectedDatasource = firstResult.get("dimensions").asJsonObject.get("datasource").asString
+                    queryResults.forEach { r ->
+                        r.asJsonObject.apply {
+                            assertEquals(expectedCampaign, get("dimensions").asJsonObject.get("campaign").asString)
+                            assertEquals(expectedDatasource, get("dimensions").asJsonObject.get("datasource").asString)
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
+    @Test
+    fun `Summary Click-Through Rate (CTR) for one campaign`() {
+
+        withTestApplication(Application::module) {
+
+            val datasource1 = getRandomString(50)
+            val campaign1 = getRandomString(50)
+            val time = Instant.now()
+
+            val dataPointRepository = DataPointRepositoryImpl()
+
+            // Create points for the datasource1,campaign1 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 10)
+                        .addField("impressions", 100)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 20)
+                        .addField("impressions", 200)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 30)
+                        .addField("impressions", 300)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            val queryString = "metric=${MetricId.ctr}&aggregate=sum&filterBy=campaign:$campaign1"
+
+            handleRequest(
+                HttpMethod.Get,
+                "/query/${MeasurementId.clicks_impressions}?$queryString").apply {
+
+                assertEquals(HttpStatusCode.OK, response.status())
+
+                var queryResultListList = JsonParser.parseString(response.content.toString()).asJsonArray
+                assert(queryResultListList.size() == 1){
+                    "Expect only one list"
+                }
+                val result = queryResultListList.first().asJsonArray.first().asJsonObject
+                val actualCtr = result.get("value").asBigDecimal.setScale(3, RoundingMode.DOWN)
+
+                val expectedCtr = BigDecimal(0.1).setScale(3, RoundingMode.DOWN)
+                assertEquals(
+                    expectedCtr, actualCtr, "Expected summary ctr to be $expectedCtr but was $actualCtr")
+            }
+        }
     }
 
     @Test
@@ -408,7 +584,7 @@ class QueryTests {
             )
         )
 
-        val queryString = "metric=${MetricId.impressions}&filterBy=campaign:$campaign&window=1d&start=-6d"
+        val queryString = "metric=${MetricId.impressions}&filterBy=campaign:$campaign&groupByTime=1d&start=-6d"
         withTestApplication(Application::module) {
             handleRequest(
                 HttpMethod.Get,
@@ -418,12 +594,12 @@ class QueryTests {
 
                 var queryResultListList = JsonParser.parseString(response.content.toString()).asJsonArray
                 assert(queryResultListList.size() == 1){
-                    "There should only be one result list as specifying a window will also aggregate, compressing to one result set"
+                    "There should only be one result list as grouping by time will also aggregate, compressing to one result set"
                 }
 
                 var queryResultList = queryResultListList.get(0).asJsonArray
                 assert(queryResultList.size() == 7) {
-                    "As the range was -7, and we were applying a daily window, 7 results were expected but found ${queryResultList.size()}."
+                    "As the range was -7, and we were grouping per day, 7 results were expected but found ${queryResultList.size()}."
                 }
             }
         }

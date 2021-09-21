@@ -42,23 +42,50 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
             "|> group()" // Otherwise data is grouped by tag combination by default
 
     fun window(): String =
-        if(query.window != null)
-            """|> aggregateWindow(every: ${query.window}, fn: ${query.aggregate ?: "sum"})"""
+        if(query.groupByTime != null)
+            """|> aggregateWindow(every: ${query.groupByTime}, fn: ${query.aggregate ?: "sum"})"""
         else
             ""
 
     fun aggregate(): String =
-        if(query.aggregate != null && query.window == null) " |> ${query.aggregate}()"
+        if(query.aggregate != null && query.groupByTime == null) " |> ${query.aggregate}()"
         else ""
 
 }
 
 class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(bucket, query) {
-    override fun filter(): String = """
-        |> filter(fn: (r) =>                 
-            (r._field == "clicks" or r._field == "impressions") 
+//    override fun filter(): String = """
+//        |> filter(fn: (r) =>
+//            (r._field == "clicks" or r._field == "impressions")
+//            ${filterBy()}
+//        )
+//        |> pivot(
+//            rowKey:["_time"],
+//            columnKey: ["_field"],
+//            valueColumn: "_value"
+//        )
+//        |> map(fn: (r) =>
+//            ({ r with _value: float(v:r.clicks) / float(v:r.impressions) })
+//        )
+//    """
+
+    override fun build(): String {
+        return if(query.aggregate != null && query.groupByTime == null)
+            buildSummary()
+        else
+            buildTimeSeries()
+    }
+
+    /**
+     * This query will only work for time series data (Non-aggregated)
+     */
+    private fun buildTimeSeries(): String = """
+        ${bucket()}
+        ${range()}
+        |> filter(fn: (r) =>
+            (r._field == "clicks" or r._field == "impressions")
             ${filterBy()}
-        ) 
+        )
         |> pivot(
             rowKey:["_time"],
             columnKey: ["_field"],
@@ -67,7 +94,52 @@ class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(b
         |> map(fn: (r) =>
             ({ r with _value: float(v:r.clicks) / float(v:r.impressions) })
         )
+        ${group()}
+        ${window()}        
+    """.trimIndent()
+
+    /**
+     * This query will only work for aggregated data (no time component)
+     */
+    private fun buildSummary(): String = """
+    clicks = ${bucket()}
+        ${range()}
+        |> filter(fn: (r) =>
+            r._field == "clicks"
+            ${filterBy()}
+        )
+        ${group()}
+        ${window()}
+        ${aggregate()}
+        
+        impressions = ${bucket()}
+        ${range()}
+        |> filter(fn: (r) =>
+            r._field == "impressions"
+            ${filterBy()}
+        )
+        ${group()}
+        ${window()}
+        ${aggregate()}        
+        join(
+          tables: {impressions:impressions, clicks:clicks},
+          on: [${joinTableOn().joinToString(separator = ",") { "\"$it\"" }}]
+        )
+        |> map(fn: (r) => ({
+            r with _value: float(v:r._value_clicks) / float(v:r._value_impressions)                      
+        }))        
+        |> yield()
     """
+
+    /**
+     * Logic here will help us determine what fields we join on when joining the impressions and clicks
+     * tables to make the ctr table
+     */
+    private fun joinTableOn(): List<String>{
+        val columns = mutableListOf<String>("_stop", "_start")
+        if(query.groupBy != null && query.groupBy.isNotEmpty()) columns.addAll(query.groupBy)
+        return columns
+    }
 }
 
 interface FluxQueryBuilderFactory {

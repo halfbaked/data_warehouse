@@ -76,7 +76,7 @@ data class Query(
     /**
      * Group data into windows of time
      */
-    val window: String? = null,
+    val groupByTime: String? = null,
 )
 
 /**
