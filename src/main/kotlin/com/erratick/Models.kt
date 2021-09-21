@@ -68,7 +68,7 @@ data class Query(
     /**
      * Results can be grouped by a particular dimension
      */
-    val groupBy: QueryStringList? = null,
+    val groupByDimensions: QueryStringList? = null,
     /**
      * Aggregate function to apply
      */

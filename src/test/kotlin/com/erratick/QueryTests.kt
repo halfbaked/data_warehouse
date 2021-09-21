@@ -134,7 +134,7 @@ class QueryTests {
 
             val queryString = "metric=${MetricId.clicks}" +
                 "&start=${startDate.epochSecond}&end=${endDate.epochSecond}" +
-                "&groupBy=datasource&filterBy=datasource:$datasource&aggregate=sum"
+                "&groupByDimensions=datasource&filterBy=datasource:$datasource&aggregate=sum"
 
             handleRequest(
                 HttpMethod.Get,
@@ -242,7 +242,7 @@ class QueryTests {
                 )
             )
 
-            val queryString = "metric=${MetricId.clicks}&groupBy=datasource,campaign"
+            val queryString = "metric=${MetricId.clicks}&groupByDimensions=datasource,campaign"
 
             handleRequest(
                 HttpMethod.Get,
@@ -359,7 +359,7 @@ class QueryTests {
                 )
             )
 
-            val queryString = "metric=${MetricId.ctr}&groupBy=datasource,campaign&aggregate=sum"
+            val queryString = "metric=${MetricId.ctr}&groupByDimensions=datasource,campaign&aggregate=sum"
 
             handleRequest(
                 HttpMethod.Get,

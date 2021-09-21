@@ -11,9 +11,9 @@ It is possible to load data via the api. The data is expected to be in csv forma
 ## Queries
 
 ### Examples
-- /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&groupByTime=1d&groupBy=campaign
+- /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&groupByTime=1d&groupByDimensions=campaign
 - /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&groupByTime=1d&start=-6d
-- /query/clicks_impressions?metric=clicks&groupBy=datasource,campaign
+- /query/clicks_impressions?metric=clicks&groupByDimensions=datasource,campaign
 
 ### Parameter Validation
 Parameter validation is currently limited to types including any enums defined. More should be invested in it.
@@ -23,7 +23,7 @@ Currently it is possible to query values directly to the database, which is frag
 - metric (required)
 - start - start of date range
 - end - end of date range
-- groupBy - one or more dimensions to group results by
+- groupByDimensions - one or more dimensions to group results by
 - filterBy - one or more key:value pairs to filter results by
 - groupByTime - specify a duration to group results by e.g. 1w (1 week) 
 - aggregate - the aggregate function to apply

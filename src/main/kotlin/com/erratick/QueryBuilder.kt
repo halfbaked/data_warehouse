@@ -36,8 +36,8 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
         query.filterBy?.entries?.joinToString { """ and r["${it.key}"] == "${it.value}" """ } ?: ""
 
     fun group(): String =
-        if(query.groupBy != null && query.groupBy.isNotEmpty())
-            """|> group(columns: [ ${query.groupBy.joinToString(",") { "\"$it\"" }} ])"""
+        if(query.groupByDimensions != null && query.groupByDimensions.isNotEmpty())
+            """|> group(columns: [ ${query.groupByDimensions.joinToString(",") { "\"$it\"" }} ])"""
         else
             "|> group()" // Otherwise data is grouped by tag combination by default
 
@@ -137,7 +137,7 @@ class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(b
      */
     private fun joinTableOn(): List<String>{
         val columns = mutableListOf<String>("_stop", "_start")
-        if(query.groupBy != null && query.groupBy.isNotEmpty()) columns.addAll(query.groupBy)
+        if(query.groupByDimensions != null && query.groupByDimensions.isNotEmpty()) columns.addAll(query.groupByDimensions)
         return columns
     }
 }
