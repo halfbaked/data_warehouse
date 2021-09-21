@@ -7,6 +7,7 @@ In understanding the design of the data warehouse it's worth breaking it into 3 
 ## Loading
 
 It is possible to load data via the api. The data is expected to be in csv format without an initial header line.
+Be sure to specify the header Content-Type=text/csv;charset=utf-8.
 
 ## Queries
 
@@ -52,6 +53,14 @@ In this project a schema is known as a measurement (type).
 Data points with a common measurement, have a common sets of dimensions and metrics.
 Measurements supported can be found by sending a GET request to `/measurements`.
 When querying or loading data, the relevant measurment id must be provided.
+
+## Tech choices
+
+### Ktor
+From the creators of IntelliJ and Kotlin. Lightweight but powerful web server that is ideal for microservices.
+
+### InfluxDB
+Time series database that helped provide both features and knowledge of the problem domain when working on this project.
 
 ## Documentation
 - [Api document on Apiary](https://datawarehouse2.docs.apiary.io/#).
