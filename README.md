@@ -10,13 +10,30 @@ It is possible to load data via the api. The data is expected to be in csv forma
 
 ## Queries
 
+### Examples
+- /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&window=1d&groupBy=campaign
+- /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&window=1d&start=-6d
+
 ### CTR value format
-I opted for a CTR format akin to basis points. Similar to how money is often represented in data, it is a menas
+I opted for a CTR format akin to basis points. Similar to how money is often represented in data, it is a means
 of storing partial values without the use of sometimes messy floats. So a CTR value of 1005 is equivalent to 10.05%.
 
 ### Parameter Validation
 Parameter validation is currently limited to types including any enums defined. More should be invested in it.
 Currently it is possible to query values directly to the database, which is fragile and insecure.
+
+### Result List Lists
+Instead of results being presented in a flat list, they are presented as a list of lists. This added complexity
+provides the ability to present multiple groups of data with one request/response to easily compare multiple time series
+on one graph. 
+
+```
+    [
+        [ Result1, Result2 ]
+        [ Result3, Result4 ] 
+    ]
+
+```
 
 ## Schemas
 
