@@ -20,25 +20,39 @@ Currently it is possible to query values directly to the database, which is frag
 
 ## Schemas
 
-#### Measurement
-A group of data points with common dimensions and metrics.
-When we know data is of a certain measurement (type) we know how to load it and how it can be queried.
-Calling it a measurement type or a measurement schema might be more accurate.
+#### Purpose
+Schemas help to communicate the data structures supported. They can also serve a role in validating input.
+In this project a schema is known as a measurement (type).
+
+Data points with a common measurement, have a common sets of dimensions and metrics.
+Measurements supported can be found by sending a GET request to `/measurements`.
+When querying or loading data, the relevant measurment id must be provided.
 
 ## Documentation
 - [Api document on Apiary](https://datawarehouse2.docs.apiary.io/#).
 - [Influxdb](https://docs.influxdata.com/influxdb/v2.0/)
 - [Ktor](https://ktor.io/docs/welcome.html)
 
-## Code structure
+## Code 
+
+### Code structure
 In bigger projects classes would be separated into different folder/packages and individual files, but given the size of the
-project, keeping the code in a few files was more elegant. 
+project, keeping the code in a few files seemed more elegant. 
 
 - *Application* - the entry point of the application
 - *Mappers* - logic to transform from one data model to another
 - *Models* - the data classes aka domain objects
 - *Repositories* - classes to access/load data from a data source
 - *Routes* - request handling aka controllers
+- *QueryBuilder* - all code related to building the queries sent to the database
+- *Loader* - all code related to loading data into the database
+
+### Factory Pattern
+The factory pattern employed for both loading and querying makes it easy to support more schemas / measurements.
+
+### Dependency Injection
+Dependency injection is provided by Koin, but is rarely used in the current code for the sake of expediency.  
+Making better use of DI would make it easier to test/mock. 
 
 ## Building and Deploying
 The ktor server can be run as an executable jar. The gradle file includes the shadow plugin which assists in 

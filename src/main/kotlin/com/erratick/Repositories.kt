@@ -5,9 +5,7 @@ import com.influxdb.client.kotlin.InfluxDBClientKotlinFactory
 import com.influxdb.client.write.Point
 import com.typesafe.config.ConfigFactory
 import io.ktor.config.*
-import kotlinx.coroutines.channels.consume
 import kotlinx.coroutines.channels.consumeEach
-import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.runBlocking
 
 
