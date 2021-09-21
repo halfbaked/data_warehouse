@@ -11,7 +11,7 @@ It is possible to load data via the api. The data is expected to be in csv forma
 ## Queries
 
 ### Examples
-- /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&window=1d&groupBy=campaign
+- /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&groupByTime=1d&groupBy=campaign
 - /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&groupByTime=1d&start=-6d
 - /query/clicks_impressions?metric=clicks&groupBy=datasource,campaign
 
@@ -25,11 +25,8 @@ Currently it is possible to query values directly to the database, which is frag
 - end - end of date range
 - groupBy - one or more dimensions to group results by
 - filterBy - one or more key:value pairs to filter results by
-- window - specify a duration to group results by e.g. 1w (1 week) 
+- groupByTime - specify a duration to group results by e.g. 1w (1 week) 
 - aggregate - the aggregate function to apply
-
-A future improvement might be to use the groupBy to group by both dimensions and time, removing the need
-for the window parameter. 
 
 ### Result List Lists
 Instead of results being presented in a flat list, they are presented as a list of lists. This added complexity
