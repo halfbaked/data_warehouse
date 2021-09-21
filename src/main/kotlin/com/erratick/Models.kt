@@ -66,7 +66,7 @@ data class Query(
      */
     val filterBy: QueryKeyValueList? = null,
     /**
-     * Results can be grouped by a particular dimension or a window of time (e.g. 1d)
+     * Results can be grouped by a particular dimension
      */
     val groupBy: QueryStringList? = null,
     /**
@@ -74,7 +74,7 @@ data class Query(
      */
     val aggregate: Aggregate? = null,
     /**
-     * Group data into windows of time
+     * Group data into windows of time. E.g. specify 1d to group per day
      */
     val groupByTime: String? = null,
 )

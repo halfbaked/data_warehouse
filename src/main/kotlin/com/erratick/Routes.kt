@@ -18,7 +18,7 @@ fun Routing.setupRoutes(){
     val loaderFactory by inject<LoaderFactory>()
 
     get<Query> { query ->
-        val measurement = MeasurementRepositoryImpl().get(query.measurement!!) ?:
+        val measurement = MeasurementRepositoryImpl().get(query.measurement) ?:
             throw Exception("Could not find measurement ${query.measurement}")
 
         val dataPointRepository = DataPointRepositoryImpl()

@@ -17,7 +17,7 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
         ${range()}
         ${filter()}
         ${group()}
-        ${window()}
+        ${groupByTime()}
         ${aggregate()}
     """
 
@@ -41,7 +41,7 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
         else
             "|> group()" // Otherwise data is grouped by tag combination by default
 
-    fun window(): String =
+    fun groupByTime(): String =
         if(query.groupByTime != null)
             """|> aggregateWindow(every: ${query.groupByTime}, fn: ${query.aggregate ?: "sum"})"""
         else
@@ -95,7 +95,7 @@ class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(b
             ({ r with _value: float(v:r.clicks) / float(v:r.impressions) })
         )
         ${group()}
-        ${window()}        
+        ${groupByTime()}        
     """.trimIndent()
 
     /**
@@ -109,7 +109,7 @@ class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(b
             ${filterBy()}
         )
         ${group()}
-        ${window()}
+        ${groupByTime()}
         ${aggregate()}
         
         impressions = ${bucket()}
@@ -119,7 +119,7 @@ class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(b
             ${filterBy()}
         )
         ${group()}
-        ${window()}
+        ${groupByTime()}
         ${aggregate()}        
         join(
           tables: {impressions:impressions, clicks:clicks},

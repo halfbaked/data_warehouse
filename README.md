@@ -12,7 +12,7 @@ It is possible to load data via the api. The data is expected to be in csv forma
 
 ### Examples
 - /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&window=1d&groupBy=campaign
-- /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&window=1d&start=-6d
+- /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&groupByTime=1d&start=-6d
 - /query/clicks_impressions?metric=clicks&groupBy=datasource,campaign
 
 ### Parameter Validation
