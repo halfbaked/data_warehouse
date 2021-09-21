@@ -10,9 +10,9 @@ It is possible to load data via the api. The data is expected to be in csv forma
 
 ## Queries
 
-### CTR format
+### CTR value format
 I opted for a CTR format akin to basis points. Similar to how money is often represented in data, it is a menas
-of storing partial values without the use of sometimes messy floats.
+of storing partial values without the use of sometimes messy floats. So a CTR value of 1005 is equivalent to 10.05%.
 
 ### Parameter Validation
 Parameter validation is currently limited to types including any enums defined. More should be invested in it.
