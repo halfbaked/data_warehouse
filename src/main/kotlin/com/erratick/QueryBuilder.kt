@@ -56,7 +56,8 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
 class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(bucket, query) {
     override fun filter(): String = """
         |> filter(fn: (r) =>                 
-            r._field == "clicks" or r._field == "impressions"                    
+            (r._field == "clicks" or r._field == "impressions") 
+            ${filterBy()}
         ) 
         |> pivot(
             rowKey:["_time"],
@@ -64,7 +65,7 @@ class CtrFluxQueryBuilder(bucket: String, query: Query): BasicFluxQueryBuilder(b
             valueColumn: "_value"
         )
         |> map(fn: (r) =>
-            ({ r with _value: 10000 * r.clicks / r.impressions })
+            ({ r with _value: float(v:r.clicks) / float(v:r.impressions) })
         )
     """
 }

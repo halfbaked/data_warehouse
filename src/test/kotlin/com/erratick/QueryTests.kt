@@ -140,8 +140,6 @@ class QueryTests {
 
                 assertEquals(HttpStatusCode.OK, response.status())
 
-                println(response.content.toString())
-
                 var queryResultList = JsonParser.parseString(response.content.toString()).asJsonArray
                 assertEquals(1, queryResultList.size(), "Expect only one list of results for this query")
 
@@ -250,8 +248,6 @@ class QueryTests {
 
                 assertEquals(HttpStatusCode.OK, response.status())
 
-                println(response.content.toString())
-
                 var queryResultList = JsonParser.parseString(response.content.toString()).asJsonArray
                 assert(queryResultList.size() >= 3){
                     "Expect at least 3 lists of results, one for each combination of datasource and campaign," +
@@ -269,6 +265,115 @@ class QueryTests {
                             assertEquals(expectedCampaign, get("dimensions").asJsonObject.get("campaign").asString)
                             assertEquals(expectedDatasource, get("dimensions").asJsonObject.get("datasource").asString)
                         }
+                    }
+                }
+            }
+        }
+
+    }
+
+    @Test
+    fun `Click-Through Rate (CTR) filteredBy a campaign`() {
+
+        withTestApplication(Application::module) {
+
+            val datasource1 = getRandomString(50)
+            val campaign1 = getRandomString(50)
+            val datasource2 = getRandomString(50)
+            val campaign2 = getRandomString(50)
+            val time = Instant.now()
+
+            val dataPointRepository = DataPointRepositoryImpl()
+
+            // Create points for the datasource1,campaign1 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 10)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 20)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign1)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 35)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            // Create points for the datasource2,campaign2 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource2)
+                        .addField("clicks", 10)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource2)
+                        .addField("clicks", 20)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource2)
+                        .addField("clicks", 35)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            // Create points for the datasource1,campaign2 combination
+            dataPointRepository.addAll(
+                listOf(
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 10)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 20)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                    Point.measurement(MeasurementId.clicks_impressions.toString())
+                        .addTag("campaign", campaign2)
+                        .addTag("datasource", datasource1)
+                        .addField("clicks", 35)
+                        .addField("impressions", 1002)
+                        .time(time, WritePrecision.MS),
+                )
+            )
+
+            val queryString = "metric=${MetricId.clicks}&filterBy=campaign:$campaign1"
+
+            handleRequest(
+                HttpMethod.Get,
+                "/query/${MeasurementId.clicks_impressions}?$queryString").apply {
+
+                assertEquals(HttpStatusCode.OK, response.status())
+
+                var queryResultListList = JsonParser.parseString(response.content.toString()).asJsonArray
+                assert(queryResultListList.size() == 1){
+                    "Expect only 1 result set in this case as no grouping"
+                }
+
+                val queryResultList = queryResultListList.first().asJsonArray
+                queryResultList.forEach { r ->
+                    r.asJsonObject.apply {
+                        assertEquals(campaign1, get("dimensions").asJsonObject.get("campaign").asString)
                     }
                 }
             }
@@ -310,8 +415,6 @@ class QueryTests {
                 "/query/${MeasurementId.clicks_impressions}?$queryString").apply {
 
                 assertEquals(HttpStatusCode.OK, response.status())
-
-                //println(response.content.toString())
 
                 var queryResultListList = JsonParser.parseString(response.content.toString()).asJsonArray
                 assert(queryResultListList.size() == 1){
