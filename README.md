@@ -13,7 +13,8 @@ It is possible to load data via the api. The data is expected to be in csv forma
 ### Examples
 - /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&groupByTime=1d&groupByDimensions=campaign
 - /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&groupByTime=1d&start=-6d
-- /query/clicks_impressions?metric=clicks&groupByDimensions=datasource,campaign
+- /query/clicks_impressions?metric=ctr&groupByDimensions=datasource,campaign&aggregate=sum
+- /query/clicks_impressions?metric=clicks&filterBy=datasource:Twitter%20Ads&aggregate=sum&start=2019-01-01T00:00:00Z&end=2019-01-10T00:00:00Z
 - /query/clicks_impressions?metric=ctr&aggregate=sum
 
 ### Parameter Validation
