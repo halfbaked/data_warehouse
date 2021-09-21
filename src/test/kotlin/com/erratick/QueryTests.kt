@@ -533,7 +533,7 @@ class QueryTests {
                 )
             )
 
-            val queryString = "metric=${MetricId.clicks}&filterBy=campaign:$campaign1"
+            val queryString = "metric=${MetricId.ctr}&filterBy=campaign:$campaign1"
 
             handleRequest(
                 HttpMethod.Get,
