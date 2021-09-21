@@ -68,6 +68,7 @@ class DataPointRepositoryImpl: DataPointRepository {
     }
 
     override fun addAll(datapoints: List<Point>) {
+        println("writing ${datapoints.size} datapoints to database")
         val influx = clientInstance()
         val writeApi = influx.getWriteKotlinApi()
         runBlocking {  writeApi.writePoints(datapoints) }

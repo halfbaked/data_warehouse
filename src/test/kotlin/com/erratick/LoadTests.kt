@@ -18,9 +18,9 @@ class LoadTests {
             handleRequest(HttpMethod.Post, "/load/${MeasurementId.clicks_impressions}"){
                 addHeader(HttpHeaders.ContentType, ContentType.Text.CSV.toString())
                 setBody("""
-                    summer promo,sales_logs,11/12/19,23,55
-                    winter promo,sales_logs,11/26/19,66,92
-                """.trimMargin()
+spring_promo2,amazon,06/06/21,23,55
+winter_promo2,sales_logs,09/08/21,66,92
+                """.trimIndent()
                 )
             }.apply {
                 assertEquals(HttpStatusCode.Created, response.status())

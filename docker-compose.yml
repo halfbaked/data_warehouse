@@ -1,0 +1,44 @@
+version: "3.3"
+
+services:
+  app:
+    depends_on:
+      - db
+    image: openjdk:11
+    container_name: "data-warehouse"
+    restart: always
+    ports:
+      - 80:8080
+    volumes:
+      -  "$PWD:/usr/src/myapp"
+    networks:
+      - dwnetwork
+    command: ['java', '-jar', '/usr/src/myapp/data-warehouse-0.0.1-all.jar']
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      - INFLUXDB_ORG=${DOCKER_INFLUXDB_INIT_ORG}
+      - INFLUXDB_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
+
+  db:
+    image: influxdb:2.0.8
+    container_name: "influxdb"
+    restart: always
+    expose:
+      - 8086
+    volumes:
+      - "$PWD/influxdb/data:/var/lib/influxdb2"
+      - "$PWD/influxdb/config:/etc/influxdb2"
+    networks:
+      - dwnetwork
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME
+      - DOCKER_INFLUXDB_INIT_PASSWORD
+      - DOCKER_INFLUXDB_INIT_ORG
+      - DOCKER_INFLUXDB_INIT_BUCKET
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN
+
+networks:
+  dwnetwork:
+    driver: bridge

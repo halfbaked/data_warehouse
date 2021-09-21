@@ -39,7 +39,7 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
         if(query.groupBy != null && query.groupBy.isNotEmpty())
             """|> group(columns: [ ${query.groupBy.joinToString(",") { "\"$it\"" }} ])"""
         else
-            ""
+            "|> group()" // Otherwise data is grouped by tag combination by default
 
     fun window(): String =
         if(query.window != null)

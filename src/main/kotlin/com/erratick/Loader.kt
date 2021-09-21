@@ -8,6 +8,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.influxdb.client.domain.WritePrecision
 import com.influxdb.client.write.Point
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.util.*
 
 
@@ -29,10 +30,17 @@ class ClickImpressionLoader: Loader {
             registerModule(KotlinModule())
             registerModule(JavaTimeModule())
             dateFormat = SimpleDateFormat("MM/dd/yy")
+
+            // Did those clicks happen on my Tuesday or your Tuesday?
+            // We are assuming the dates in the data are UTC and are hardcoding as such here, but ideally
+            // this should be configurable. The ideal of course would be for the input data to have that detail
+            // built into the date format.
+            setTimeZone(TimeZone.getTimeZone("UTC"))
         }
         val schema = mapper.schemaFor(ClickImpressionMeasurement::class.java)
         val iterator: MappingIterator<ClickImpressionMeasurement> = mapper.readerFor(ClickImpressionMeasurement::class.java).with(schema)
             .readValues(data)
+
         DataPointRepositoryImpl().addAll(
             iterator.readAll().map{
                 Point.measurement(MeasurementId.clicks_impressions.toString())
@@ -41,7 +49,7 @@ class ClickImpressionLoader: Loader {
                     .addField("clicks", it.clicks)
                     .addField("impressions", it.impressions)
                     .time(it.time.toInstant(), WritePrecision.MS)
-            }
+            }.toList()
         )
     }
 }
