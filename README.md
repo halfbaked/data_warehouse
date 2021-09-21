@@ -13,6 +13,7 @@ It is possible to load data via the api. The data is expected to be in csv forma
 ### Examples
 - /query/clicks_impressions?metric=impressions&start=2019-01-01T00:00:00Z&end=2019-01-03T00:00:00Z&window=1d&groupBy=campaign
 - /query/clicks_impressions?metric=impressions&filterBy=campaign:Google&window=1d&start=-6d
+- /query/clicks_impressions?metric=clicks&groupBy=datasource,campaign
 
 ### CTR value format
 I opted for a CTR format akin to basis points. Similar to how money is often represented in data, it is a means
@@ -21,6 +22,18 @@ of storing partial values without the use of sometimes messy floats. So a CTR va
 ### Parameter Validation
 Parameter validation is currently limited to types including any enums defined. More should be invested in it.
 Currently it is possible to query values directly to the database, which is fragile and insecure.
+
+### Parameters
+- metric (required)
+- start - start of date range
+- end - end of date range
+- groupBy - one or more dimensions to group results by
+- filterBy - one or more key:value pairs to filter results by
+- window - specify a duration to group results by e.g. 1w (1 week) 
+- aggregate - the aggregate function to apply
+
+A future improvement might be to use the groupBy to group by both dimensions and time, removing the need
+for the window parameter. 
 
 ### Result List Lists
 Instead of results being presented in a flat list, they are presented as a list of lists. This added complexity
