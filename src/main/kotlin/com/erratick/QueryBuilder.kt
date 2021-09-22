@@ -33,7 +33,7 @@ open class BasicFluxQueryBuilder(val bucket: String, val query: Query): FluxQuer
     """
 
     fun filterBy(): String  =
-        query.filterBy?.entries?.joinToString { """ and r["${it.key}"] == "${it.value}" """ } ?: ""
+        query.filterBy?.entries?.joinToString(" ") { """ and r["${it.key}"] == "${it.value}" """ } ?: ""
 
     fun group(): String =
         if(query.groupByDimensions != null && query.groupByDimensions.isNotEmpty())
